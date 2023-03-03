@@ -2,9 +2,6 @@
  * 当我发送网络请求的时候，需要拿到这次网络请求的数据，再发送网络请求，就这样重复三次，才能拿到我最终的结果
  */
 
-/**
- * 不优雅写法1
- */
 function requestData(url) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -17,6 +14,9 @@ function requestData(url) {
     });
 }
 
+/**
+ * 不优雅写法1
+ */
 requestData("iceweb.io").then((res) => {
     requestData(`iceweb.org ${res}`).then((res) => {
         requestData(`iceweb.com ${res}`).then((res) => {
@@ -32,17 +32,6 @@ requestData("iceweb.io").then((res) => {
  * 不优雅写法2
  * 利用了then链式调用这一特性，返回了一个新的promise
  */
-function requestData(url) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (url.includes("iceweb")) {
-                resolve(url);
-            } else {
-                reject("请求错误");
-            }
-        }, 1000);
-    });
-}
 
 requestData("iceweb.io")
     .then((res) => {
@@ -65,19 +54,8 @@ requestData("iceweb.io")
  *  生成器+Promise解法
  */
 
-function requestData(url) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (url.includes("iceweb")) {
-                resolve(url);
-            } else {
-                reject("请求错误");
-            }
-        }, 1000);
-    });
-}
-
-function* getData(url) {
+function* getData1(url) {
+    console.log(url);
     const res1 = yield requestData(url);
     const res2 = yield requestData(res1);
     const res3 = yield requestData(res2);
@@ -85,7 +63,7 @@ function* getData(url) {
     console.log(res3);
 }
 
-const generator = getData("iceweb.io");
+const generator = getData1("iceweb.io");
 
 generator.next().value.then((res1) => {
     generator.next(`iceweb.org ${res1}`).value.then((res2) => {
@@ -105,6 +83,14 @@ generator.next().value.then((res1) => {
  */
 
 //自动化执行 async await相当于自动帮我们执行.next
+
+function* getData() {
+    const res1 = yield requestData("iceweb.io");
+    const res2 = yield requestData(`iceweb.org ${res1}`);
+    const res3 = yield requestData(`iceweb.com ${res2}`);
+    console.log(res3);
+}
+
 function _async(genFn) {
     const generator = genFn();
 
@@ -132,7 +118,7 @@ _async(getData);
  * async/await 解决回调地狱
  */
 
-function requestData(url) {
+function _requestData(url) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             if (url.includes("iceweb")) {
@@ -144,14 +130,14 @@ function requestData(url) {
     });
 }
 
-async function getData() {
-    const res1 = await requestData("iceweb.io");
-    const res2 = await requestData(`iceweb.org ${res1}`);
-    const res3 = await requestData(`iceweb.com ${res2}`);
+async function _getData() {
+    const res1 = await _requestData("iceweb.io");
+    const res2 = await _requestData(`iceweb.org ${res1}`);
+    const res3 = await _requestData(`iceweb.com ${res2}`);
 
     console.log(res3);
 }
 
-getData();
+_getData();
 
 //iceweb.com iceweb.org iceweb.io
