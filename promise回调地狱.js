@@ -130,6 +130,7 @@ function _requestData(url) {
     });
 }
 
+// 最后解决方式
 async function _getData() {
     const res1 = await _requestData("iceweb.io");
     const res2 = await _requestData(`iceweb.org ${res1}`);
